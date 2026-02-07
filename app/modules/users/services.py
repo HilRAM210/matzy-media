@@ -1,13 +1,6 @@
-import bcrypt
 from sqlalchemy.orm import Session
 from app.modules.users import models, schemas
-
-
-def hash_password(password: str):
-    pwd_bytes = password.encode("utf-8")
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(pwd_bytes, salt)
-    return hashed_password.decode("utf-8")
+from app.shared.utils.password import hash_password
 
 
 def create_user(db: Session, user: schemas.UserCreate):

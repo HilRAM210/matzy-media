@@ -3,6 +3,9 @@ from typing import List, Optional
 
 
 class Settings(BaseSettings):
+    # APP
+    app_name: str
+
     # API
     database_hostname: str
     database_port: str
