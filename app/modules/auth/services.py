@@ -43,4 +43,4 @@ def verify_access_token(token: str):
             return None
         return int(user_id)
     except InvalidTokenError:
-        raise None
+        return None

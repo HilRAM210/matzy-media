@@ -5,6 +5,7 @@ from typing import List, Optional
 class Settings(BaseSettings):
     # APP
     app_name: str
+    app_prefix: str
 
     # API
     database_hostname: str
