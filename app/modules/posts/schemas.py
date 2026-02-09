@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
+from app.modules.users.schemas import UserOut
+
 
 class PostBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
@@ -28,4 +30,4 @@ class PostOut(PostBase):
 
 
 class PostWithUser(PostOut):
-    user: dict
+    user: UserOut

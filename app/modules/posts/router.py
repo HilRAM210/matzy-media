@@ -12,8 +12,13 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 # Ambil semua postingan
 @router.get("/", response_model=List[schemas.PostOut])
-async def get_posts(db: Session = Depends(get_db)):
-    posts = services.get_posts(db)
+async def get_posts(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: int = Depends(get_current_user),
+):
+    posts = services.get_posts(db, skip=skip, limit=limit)
     return posts
 
 
@@ -30,65 +35,29 @@ async def create_post(
 
 # Ambil satu postingan berdasarkan id
 @router.get("/{post_id}", response_model=schemas.PostOut)
-async def get_one_post(post_id: int, db: Session = Depends(get_db)):
-    post = services.get_posts_by_id(db, post_id)
-
-    if not post:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"post with id: {post_id} was not found",
-        )
+async def get_one_post(
+    post: models.Post = Depends(dependencies.get_post_by_id),
+    current_user: int = Depends(get_current_user),
+):
     return post
 
 
 # Hapus Postingan
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(
-    post_id: int,
+    post: models.Post = Depends(dependencies.get_post_for_owner),
     db: Session = Depends(get_db),
-    current_user: int = Depends(get_current_user),
 ):
-    post_query = db.query(models.Post).filter(models.Post.id == post_id)
-    post = post_query.first()
-
-    if not post:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"post with id: {post_id} was not found",
-        )
-
-    if post.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"not authotized to perform request actions",
-        )
-    post_query.delete(synchronize_session=False)
-    db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    services.delete_post(db, post.id)
+    return None
 
 
 # Update postingan
 @router.put("/{post_id}", response_model=schemas.PostOut)
 async def delete_post(
-    post_id: int,
-    updated_post: schemas.PostUpdate,
+    post_update: schemas.PostUpdate,
+    post: models.Post = Depends(dependencies.get_post_for_owner),
     db: Session = Depends(get_db),
-    current_user: int = Depends(get_current_user),
 ):
-    post_query = db.query(models.Post).filter(models.Post.id == post_id)
-    post = post_query.first()
-
-    if not post:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"post with id: {post_id} was not found",
-        )
-
-    if post.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"not authotized to perform request actions",
-        )
-    post_query.update(updated_post.dict(), synchronize_session=False)
-    db.commit()
-    return post_query.first()
+    updated_post = services.update_post(db=db, post_id=post.id, post_update=post_update)
+    return updated_post
