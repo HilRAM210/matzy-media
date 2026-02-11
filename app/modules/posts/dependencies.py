@@ -18,17 +18,6 @@ def get_post_by_id(post_id: int, db: Session = Depends(get_db)):
     return post
 
 
-def validate_post_ownership(
-    post=Depends(get_post_by_id), current_user=Depends(get_current_user)
-):
-    if post.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to perform this action",
-        )
-    return post
-
-
 def get_post_for_owner(
     post_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)
 ):
