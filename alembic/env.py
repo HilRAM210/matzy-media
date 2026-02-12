@@ -7,6 +7,7 @@ from alembic import context
 from app.core.base import Base
 from app.modules.users import models
 from app.modules.posts import models
+from app.modules.votes import models
 
 from app.core.config import settings
 

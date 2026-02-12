@@ -14,7 +14,6 @@ class Post(Base):
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    user = relationship("User")
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -24,3 +23,11 @@ class Post(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    user = relationship("User")
+    votes = relationship("Vote", back_populates="post", cascade="all, delete-orphan")
+
+    @property
+    def vote_score(self):
+        if not self.votes:
+            return 0
+        return sum(vote.vote_type for vote in self.votes)
