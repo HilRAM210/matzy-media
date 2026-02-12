@@ -11,7 +11,7 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
 # Ambil semua postingan
-@router.get("/", response_model=List[schemas.PostOut])
+@router.get("/", response_model=List[schemas.PostWithDetails])
 async def get_posts(
     db: Session = Depends(get_db),
     skip: int = 0,
@@ -19,7 +19,24 @@ async def get_posts(
     current_user: int = Depends(get_current_user),
 ):
     posts = services.get_posts(db, skip=skip, limit=limit)
-    return posts
+    result = []
+    for post in posts:
+        post_dict = {
+            "id": post.id,
+            "title": post.title,
+            "content": post.content,
+            "user_id": post.user_id,
+            "created_at": post.created_at,
+            "updated_at": post.updated_at,
+            "user": post.user,
+            "votes": {
+                "upvotes": sum(1 for v in post.votes if v.vote_type == 1),
+                "downvotes": sum(1 for v in post.votes if v.vote_type == -1),
+            },
+        }
+        result.append(post_dict)
+
+    return result
 
 
 # Buat postingan baru
@@ -34,12 +51,25 @@ async def create_post(
 
 
 # Ambil satu postingan berdasarkan id
-@router.get("/{post_id}", response_model=schemas.PostOut)
+@router.get("/{post_id}", response_model=schemas.PostWithDetails)
 async def get_one_post(
     post: models.Post = Depends(dependencies.get_post_by_id),
     current_user: int = Depends(get_current_user),
 ):
-    return post
+    post_dict = {
+        "id": post.id,
+        "title": post.title,
+        "content": post.content,
+        "user_id": post.user_id,
+        "created_at": post.created_at,
+        "updated_at": post.updated_at,
+        "user": post.user,
+        "votes": {
+            "upvotes": sum(1 for v in post.votes if v.vote_type == 1),
+            "downvotes": sum(1 for v in post.votes if v.vote_type == -1),
+        },
+    }
+    return post_dict
 
 
 # Hapus Postingan

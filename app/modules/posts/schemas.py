@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from app.modules.users.schemas import UserOut
 
@@ -31,3 +31,24 @@ class PostOut(PostBase):
 
 class PostWithUser(PostOut):
     user: UserOut
+
+
+class VoteInfo(BaseModel):
+    user_id: int
+    vote_type: int
+
+    class Config:
+        from_attributes = True
+
+
+class VoteSummary(BaseModel):
+    upvotes: int = 0
+    downvotes: int = 0
+
+
+class PostWithDetails(PostOut):
+    user: UserOut
+    votes: VoteSummary
+
+    class Config:
+        from_attributes = True

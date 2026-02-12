@@ -25,9 +25,3 @@ class Post(Base):
     )
     user = relationship("User")
     votes = relationship("Vote", back_populates="post", cascade="all, delete-orphan")
-
-    @property
-    def vote_score(self):
-        if not self.votes:
-            return 0
-        return sum(vote.vote_type for vote in self.votes)

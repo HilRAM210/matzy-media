@@ -9,7 +9,7 @@ router = APIRouter(prefix="/votes", tags=["Votes"])
 
 
 # Buat atau update vote
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=schemas.VoteOut)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.VoteOut)
 async def vote(
     vote: schemas.VoteCreate,
     db: Session = Depends(get_db),

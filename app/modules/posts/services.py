@@ -1,5 +1,5 @@
 from sqlalchemy import update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.modules.posts import schemas, models
 
 
@@ -12,11 +12,22 @@ def create_post(db: Session, post: schemas.PostCreate, user_id: int):
 
 
 def get_posts(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Post).offset(skip).limit(limit).all()
+    return (
+        db.query(models.Post)
+        .options(joinedload(models.Post.user), joinedload(models.Post.votes))
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def get_posts_by_id(db: Session, post_id: int):
-    return db.query(models.Post).filter(models.Post.id == post_id).first()
+    return (
+        db.query(models.Post)
+        .options(joinedload(models.Post.user), joinedload(models.Post.votes))
+        .filter(models.Post.id == post_id)
+        .first()
+    )
 
 
 def update_post(db: Session, post_id: int, post_update: schemas.PostUpdate):
